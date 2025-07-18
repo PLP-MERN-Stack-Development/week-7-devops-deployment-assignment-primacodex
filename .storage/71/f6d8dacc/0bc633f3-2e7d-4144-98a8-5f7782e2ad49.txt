@@ -1,0 +1,47 @@
+$ mkdir -p monitoring/grafana/provisioning/dashboards monitoring/grafana/provisioning/datasources
+$ chmod +x server/deploy.sh
+
+$ cd /workspace/react_template && pnpm install react-router-dom
+
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Progress: resolved 293, reused 292, downloaded 1, added 0
+Packages: +4
+++++
+Progress: resolved 447, reused 402, downloaded 4, added 4, done
+
+dependencies:
++ react-router-dom 7.7.0
+
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: esbuild.                                            │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+Done in 2.6s using pnpm v10.13.1
+$ cd /workspace/react_template && pnpm run build
+
+
+> react-template@0.0.0 build /workspace/react_template
+> vite build
+
+vite v5.4.19 building for production...
+transforming...
+✓ 48 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.54 kB │ gzip:  0.34 kB
+dist/assets/index-DpSsslRV.css   17.71 kB │ gzip:  4.06 kB
+dist/assets/index-B1hP_5J6.js   205.89 kB │ gzip: 63.44 kB
+✓ built in 1.84s
+$ cd /workspace/react_template && pnpm run lint
+
+
+> react-template@0.0.0 lint /workspace/react_template
+> eslint ./src --quiet
+
+$ cd /workspace && zip -r react_template.zip react_template
+
+bash: line 16: zip: command not found

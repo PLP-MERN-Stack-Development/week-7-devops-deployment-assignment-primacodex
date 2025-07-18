@@ -1,0 +1,107 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # Test backend
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+        mongodb-version: [5.0]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: server/package.json
+    
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.10.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+    
+    - name: Install backend dependencies
+      run: |
+        cd server
+        npm ci
+    
+    - name: Run backend tests
+      run: |
+        cd server
+        npm test
+      env:
+        MONGO_URI: mongodb://localhost:27017/mern-test
+        JWT_SECRET: test-secret
+        NODE_ENV: test
+  
+  # Test frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install frontend dependencies
+      run: npm ci
+    
+    - name: Run lint
+      run: npm run lint
+    
+    - name: Build frontend
+      run: npm run build
+  
+  # Deploy to production (only on main/master branch)
+  deploy:
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install frontend dependencies and build
+      run: |
+        npm ci
+        npm run build
+    
+    # Deploy to server (example with SSH deploy)
+    - name: Deploy to Production Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /var/www/mern-deployment
+          git pull
+          cd server
+          npm ci --only=production
+          pm2 restart server

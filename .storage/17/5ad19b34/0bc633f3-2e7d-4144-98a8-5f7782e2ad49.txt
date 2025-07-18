@@ -1,0 +1,5 @@
+$ cd /workspace/react_template
+$ mkdir -p server public/assets/images src/components src/pages src/context src/services src/utils
+
+$ mkdir -p server/routes server/controllers server/models server/middleware server/utils server/config
+

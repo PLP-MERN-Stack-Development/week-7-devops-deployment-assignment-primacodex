@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://server:5000/api
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+  # Backend service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/mern-deployment
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=30d
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+  # MongoDB service
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+  # Monitoring service with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+  # Grafana for dashboard visualization
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+volumes:
+  mongodb-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  mern-network:
+    driver: bridge

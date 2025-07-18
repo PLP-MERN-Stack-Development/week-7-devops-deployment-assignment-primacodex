@@ -1,0 +1,23 @@
+$ mkdir -p monitoring/grafana/provisioning/dashboards monitoring/grafana/provisioning/datasources
+$ chmod +x server/deploy.sh
+
+$ cd /workspace/react_template && pnpm install react-router-dom
+
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Progress: resolved 293, reused 292, downloaded 1, added 0
+Packages: +4
+++++
+Progress: resolved 447, reused 402, downloaded 4, added 4, done
+
+dependencies:
++ react-router-dom 7.7.0
+
+╭ Warning ─────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│   Ignored build scripts: esbuild.                                            │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+│   to run scripts.                                                            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+Done in 2.6s using pnpm v10.13.1
